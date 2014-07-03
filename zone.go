@@ -200,6 +200,9 @@ func (z *Zone) AddResource(record IRecord) (err error) {
 }
 
 func (z *Zone) UpdateResource(record IRecord) (err error) {
+	if record.GetId() == "" {
+		return ErrIdUnset
+	}
 	record.clearName()
 
 	bodyObject := struct {
