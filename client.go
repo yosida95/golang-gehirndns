@@ -289,3 +289,28 @@ func (c *Client) AddResource(record IRecord) (err error) {
 	err = c.request(request, &responseBody)
 	return
 }
+
+func (c *Client) UpdateResource(record IRecord) (err error) {
+	bodyObject := struct {
+		Resource IRecord
+	}{
+		Resource: record,
+	}
+	body, err := c.encodeJSON(bodyObject)
+	if err != nil {
+		return
+	}
+
+	request, err := c.makeRequest("PUT", record.GetId().String(), body)
+	if err != nil {
+		return
+	}
+
+	responseBody := struct {
+		Resource IRecord
+	}{
+		Resource: record,
+	}
+	err = c.request(request, &responseBody)
+	return
+}
