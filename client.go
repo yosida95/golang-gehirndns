@@ -69,7 +69,21 @@ func (c *Client) request(req *http.Request, body interface{}) (err error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf(resp.Status)
+		body := struct {
+			Error struct {
+				Code    uint   `json:"code"`
+				Message string `json:"message"`
+			} `json:"error"`
+			Successful bool `json:"is_success"`
+		}{}
+
+		decoder := json.NewDecoder(resp.Body)
+		err = decoder.Decode(&body)
+		if err != nil {
+			return fmt.Errorf(resp.Status)
+		}
+
+		return fmt.Errorf(body.Error.Message)
 	}
 
 	decoder := json.NewDecoder(resp.Body)
