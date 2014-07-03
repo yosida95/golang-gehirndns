@@ -190,12 +190,7 @@ func (z *Zone) AddResource(record IRecord) (err error) {
 		return
 	}
 
-	responseBody := struct {
-		Resource IRecord
-	}{
-		Resource: record,
-	}
-	err = z.client.request(request, &responseBody)
+	err = z.client.request(request, &bodyObject)
 	return
 }
 
@@ -220,11 +215,6 @@ func (z *Zone) UpdateResource(record IRecord) (err error) {
 		return
 	}
 
-	responseBody := struct {
-		Resource IRecord
-	}{
-		Resource: record,
-	}
-	err = z.client.request(request, &responseBody)
+	err = z.client.request(request, &bodyObject)
 	return
 }
