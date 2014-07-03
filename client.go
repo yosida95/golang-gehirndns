@@ -3,7 +3,6 @@ package gehirndns
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -63,19 +62,19 @@ func (c *Client) request(req *http.Request, body interface{}) (err error) {
 
 	if resp.StatusCode != 200 {
 		body := struct {
-			Error struct {
-				Code    uint   `json:"code"`
-				Message string `json:"message"`
-			} `json:"error"`
+			Error errorResponse `json:"error"`
 		}{}
 
 		decoder := json.NewDecoder(resp.Body)
 		err = decoder.Decode(&body)
 		if err != nil {
-			return fmt.Errorf(resp.Status)
+			return errorResponse{
+				Code:    resp.StatusCode,
+				Message: resp.Status,
+			}
 		}
 
-		return fmt.Errorf(body.Error.Message)
+		return body.Error
 	}
 
 	decoder := json.NewDecoder(resp.Body)
