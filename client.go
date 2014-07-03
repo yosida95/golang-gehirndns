@@ -19,13 +19,17 @@ const (
 
 type ZoneId uint
 
-type Client struct {
-	endpoint  *url.URL
-	apiToken  string
-	apiSecret string
+type ApiKey struct {
+	Token  string
+	Secret string
 }
 
-func NewClient(zoneId ZoneId, apiToken, apiSecret string) *Client {
+type Client struct {
+	endpoint *url.URL
+	apiKey   *ApiKey
+}
+
+func NewClient(zoneId ZoneId, apiKey *ApiKey) *Client {
 	endpoint, err := url.Parse(APIENDPOINT)
 	if err != nil {
 		panic(err)
@@ -37,9 +41,8 @@ func NewClient(zoneId ZoneId, apiToken, apiSecret string) *Client {
 		strconv.Itoa(int(zoneId)))
 
 	return &Client{
-		endpoint:  endpoint,
-		apiToken:  apiToken,
-		apiSecret: apiSecret,
+		endpoint: endpoint,
+		apiKey:   apiKey,
 	}
 }
 
@@ -57,7 +60,7 @@ func (c *Client) makeRequest(method, path string, body io.Reader) (req *http.Req
 		return
 	}
 
-	req.SetBasicAuth(c.apiToken, c.apiSecret)
+	req.SetBasicAuth(c.apiKey.Token, c.apiKey.Secret)
 	req.Header.Add("Content-Type", "text/json;charset=utf8")
 	return
 }
