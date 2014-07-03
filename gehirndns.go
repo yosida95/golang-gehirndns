@@ -1,6 +1,7 @@
 package gehirndns
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -157,6 +158,7 @@ func (c *Client) makeRequest(method, path string, body io.Reader) (req *http.Req
 	}
 
 	req.SetBasicAuth(c.apiToken, c.apiSecret)
+	req.Header.Add("Content-Type", "text/json;charset=utf8")
 	return
 }
 
@@ -222,7 +224,7 @@ func (c *Client) AddNS(name, ns HostName, ttl Seconds) (record *NSRecord, err er
 		},
 	}
 
-	c.AddResource(record)
+	err = c.AddResource(record)
 	return
 }
 
@@ -240,7 +242,7 @@ func (c *Client) AddA(name HostName, addr IPv4, ttl Seconds) (record *ARecord, e
 		},
 	}
 
-	c.AddResource(record)
+	err = c.AddResource(record)
 	return
 }
 
@@ -258,7 +260,7 @@ func (c *Client) AddAAAA(name HostName, addr IPv6, ttl Seconds) (record *AAAARec
 		},
 	}
 
-	c.AddResource(record)
+	err = c.AddResource(record)
 	return
 }
 
@@ -276,7 +278,7 @@ func (c *Client) AddCNAME(name, to HostName, ttl Seconds) (record *CNAMERecord, 
 		},
 	}
 
-	c.AddResource(record)
+	err = c.AddResource(record)
 	return
 }
 
@@ -295,7 +297,7 @@ func (c *Client) AddMX(name, mailServer HostName, priority Priority, ttl Seconds
 		},
 	}
 
-	c.AddResource(record)
+	err = c.AddResource(record)
 	return
 }
 
@@ -313,7 +315,7 @@ func (c *Client) AddTXT(name HostName, value string, ttl Seconds) (record *TXTRe
 		},
 	}
 
-	c.AddResource(record)
+	err = c.AddResource(record)
 	return
 }
 
@@ -334,22 +336,38 @@ func (c *Client) AddSRV(name, target HostName, port, weight uint, priority Prior
 		},
 	}
 
-	c.AddResource(record)
+	err = c.AddResource(record)
 	return
 }
 
-func (c *Client) AddResource(record IRecord) (err error) {
-	request := struct {
-		Resource IRecord
-	}{
-		Resource: record,
-	}
-
-	body, err := json.MarshalIndent(request, "", "  ")
+func (c *Client) encodeJSON(object interface{}) (reader io.Reader, err error) {
+	buffer := bytes.NewBuffer(nil)
+	encoder := json.NewEncoder(buffer)
+	err = encoder.Encode(object)
 	if err != nil {
 		return
 	}
 
-	fmt.Println(string(body))
+	reader = buffer
+	return
+}
+
+func (c *Client) AddResource(record IRecord) (err error) {
+	bodyObject := struct {
+		Resource IRecord
+	}{
+		Resource: record,
+	}
+	body, err := c.encodeJSON(bodyObject)
+	if err != nil {
+		return
+	}
+
+	request, err := c.makeRequest("POST", "", body)
+	if err != nil {
+		return
+	}
+
+	err = c.request(request, record)
 	return
 }
