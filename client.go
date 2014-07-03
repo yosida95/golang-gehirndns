@@ -278,6 +278,11 @@ func (c *Client) AddResource(record IRecord) (err error) {
 		return
 	}
 
-	err = c.request(request, record)
+	responseBody := struct {
+		Resource IRecord
+	}{
+		Resource: record,
+	}
+	err = c.request(request, &responseBody)
 	return
 }
