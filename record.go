@@ -1,13 +1,13 @@
 package gehirndns
 
 import (
+	"strings"
 	"time"
 )
 
 type (
 	IPv4        string
 	IPv6        string
-	HostName    string
 	MailAddress string
 	RecordType  string
 	Priority    uint64
@@ -29,6 +29,7 @@ type IRecord interface {
 	GetId() RecordId
 	GetHostName() HostName
 	SetHostName(HostName)
+	setHostNameByName(HostName)
 	GetName() HostName
 	clearName()
 	GetType() RecordType
@@ -54,6 +55,22 @@ func (r *record) GetHostName() HostName {
 
 func (r *record) SetHostName(name HostName) {
 	r.HostName = name
+}
+
+func (r *record) setHostNameByName(domain HostName) {
+	println(domain)
+	println(r.GetName())
+	if domain == r.GetName() {
+		r.HostName = "@"
+		return
+	}
+
+	if !strings.HasSuffix(r.GetName().String(), "."+domain.String()) {
+		r.HostName = r.GetName()
+		return
+	}
+
+	r.HostName = r.GetName()[0 : len(r.GetName())-len(domain)-1]
 }
 
 func (r *record) GetName() HostName {

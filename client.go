@@ -107,10 +107,18 @@ func (c *Client) GetZone(id ZoneId) (zone *Zone, err error) {
 
 	body := struct {
 		Resource *Zone
+		Domain   struct {
+			Name HostName
+		}
 	}{
 		Resource: zone,
 	}
 
 	err = c.request(req, &body)
+	if err != nil {
+		return
+	}
+
+	zone.postGet(body.Domain.Name)
 	return
 }

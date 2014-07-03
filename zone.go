@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"path"
+	"reflect"
 	"strconv"
 )
 
@@ -17,18 +18,49 @@ func (id ZoneId) String() string {
 	return strconv.Itoa(id.Int())
 }
 
+type HostName string
+
+func (host HostName) String() string {
+	return string(host)
+}
+
 type Zone struct {
 	id     ZoneId
 	client *Client
 
-	SOA   SOARecord
-	NS    []NSRecord
-	A     []ARecord
-	AAAA  []AAAARecord
-	CNAME []CNAMERecord
-	MX    []MXRecord
-	TXT   []TXTRecord
-	SRV   []SRVRecord
+	SOA   *SOARecord
+	NS    []*NSRecord
+	A     []*ARecord
+	AAAA  []*AAAARecord
+	CNAME []*CNAMERecord
+	MX    []*MXRecord
+	TXT   []*TXTRecord
+	SRV   []*SRVRecord
+}
+
+func (z *Zone) postGetRecord(record IRecord, domain HostName) {
+	record.setHostNameByName(domain)
+}
+
+func (z *Zone) postGetRecords(records interface{}, domain HostName) {
+	func(recordsV reflect.Value) {
+		for i := 0; i < recordsV.Len(); i++ {
+			recordV := recordsV.Index(i)
+			record := recordV.Interface().(IRecord)
+			z.postGetRecord(record, domain)
+		}
+	}(reflect.ValueOf(records))
+}
+
+func (z *Zone) postGet(domain HostName) {
+	z.postGetRecord(z.SOA, domain)
+	z.postGetRecords(z.NS, domain)
+	z.postGetRecords(z.A, domain)
+	z.postGetRecords(z.AAAA, domain)
+	z.postGetRecords(z.CNAME, domain)
+	z.postGetRecords(z.MX, domain)
+	z.postGetRecords(z.TXT, domain)
+	z.postGetRecords(z.SRV, domain)
 }
 
 func (z *Zone) makeRequest(method string, id RecordId, body io.Reader) (*http.Request, error) {
