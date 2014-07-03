@@ -74,7 +74,6 @@ func (c *Client) request(req *http.Request, body interface{}) (err error) {
 				Code    uint   `json:"code"`
 				Message string `json:"message"`
 			} `json:"error"`
-			Successful bool `json:"is_success"`
 		}{}
 
 		decoder := json.NewDecoder(resp.Body)
@@ -111,13 +110,10 @@ func (c *Client) GetResources() (err error) {
 			TXT   []TXTRecord
 			SRV   []SRVRecord
 		}
-		Successful bool `json:"is_success"`
 	}{}
 
 	if err = c.request(req, &body); err != nil {
 		return
-	} else if !body.Successful {
-		return fmt.Errorf("unsuccessful")
 	}
 
 	pretty.Println(body.Resource)
