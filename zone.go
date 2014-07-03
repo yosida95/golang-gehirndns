@@ -250,3 +250,22 @@ func (z *Zone) UpdateResource(record IRecord) (err error) {
 	err = z.client.request(request, &bodyObject)
 	return
 }
+
+func (z *Zone) DeleteResource(record IRecord) (err error) {
+	if record.GetId() == "" {
+		return ErrIdUnset
+	}
+
+	request, err := z.makeRequest("DELETE", record.GetId(), nil)
+	if err != nil {
+		return
+	}
+
+	responseBody := struct {
+		Resource IRecord
+	}{
+		Resource: record,
+	}
+	err = z.client.request(request, &responseBody)
+	return
+}
