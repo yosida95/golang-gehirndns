@@ -9,21 +9,31 @@ type (
 	IPv6        string
 	HostName    string
 	MailAddress string
-	RecordId    string
 	RecordType  string
-	Seconds     int64
 	Priority    uint64
 )
+
+type Seconds int64
 
 func (s Seconds) Duration() time.Duration {
 	return time.Duration(s) * time.Second
 }
 
+type RecordId string
+
+func (id RecordId) String() string {
+	return string(id)
+}
+
 type IRecord interface {
 	GetId() RecordId
 	GetHostName() HostName
+	SetHostName(HostName)
+	GetName() HostName
+	clearName()
 	GetType() RecordType
 	GetTTL() Seconds
+	SetTTL(Seconds)
 }
 
 type record struct {
@@ -39,11 +49,19 @@ func (r *record) GetId() RecordId {
 }
 
 func (r *record) GetHostName() HostName {
-	if len(r.Name) > 0 {
-		return r.Name
-	}
-
 	return r.HostName
+}
+
+func (r *record) SetHostName(name HostName) {
+	r.HostName = name
+}
+
+func (r *record) GetName() HostName {
+	return r.Name
+}
+
+func (r *record) clearName() {
+	r.Name = ""
 }
 
 func (r *record) GetType() RecordType {
@@ -52,6 +70,10 @@ func (r *record) GetType() RecordType {
 
 func (r *record) GetTTL() Seconds {
 	return r.TTL
+}
+
+func (r *record) SetTTL(ttl Seconds) {
+	r.TTL = ttl
 }
 
 type SOARecord struct {
