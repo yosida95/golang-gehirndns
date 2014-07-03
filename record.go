@@ -26,7 +26,7 @@ type IRecord interface {
 	GetTTL() Seconds
 }
 
-type Record struct {
+type record struct {
 	Id       RecordId `json:"ID,omitempty"`
 	Name     HostName `json:",omitempty"`
 	HostName HostName
@@ -34,11 +34,11 @@ type Record struct {
 	TTL      Seconds    `json:"TTL"`
 }
 
-func (r *Record) GetId() RecordId {
+func (r *record) GetId() RecordId {
 	return r.Id
 }
 
-func (r *Record) GetHostName() HostName {
+func (r *record) GetHostName() HostName {
 	if len(r.Name) > 0 {
 		return r.Name
 	}
@@ -46,11 +46,11 @@ func (r *Record) GetHostName() HostName {
 	return r.HostName
 }
 
-func (r *Record) GetType() RecordType {
+func (r *record) GetType() RecordType {
 	return r.Type
 }
 
-func (r *Record) GetTTL() Seconds {
+func (r *record) GetTTL() Seconds {
 	return r.TTL
 }
 
@@ -62,38 +62,38 @@ type SOARecord struct {
 	Retry            Seconds
 	Expire           Seconds
 	NegativeCacheTTL Seconds
-	Record
+	record
 }
 
 type NSRecord struct {
 	NameServer HostName
-	Record
+	record
 }
 
 type ARecord struct {
 	IPAddress IPv4 `json:"IPAddress"`
-	Record
+	record
 }
 
 type AAAARecord struct {
 	IPAddress IPv6 `json:"IPAddress"`
-	Record
+	record
 }
 
 type CNAMERecord struct {
 	AliasTo HostName `json:"AliasTo"`
-	Record
+	record
 }
 
 type MXRecord struct {
 	MailServer HostName
 	Priority   Priority
-	Record
+	record
 }
 
 type TXTRecord struct {
 	Value string
-	Record
+	record
 }
 
 type SRVRecord struct {
@@ -101,5 +101,5 @@ type SRVRecord struct {
 	Weight   uint
 	Port     uint
 	Target   HostName
-	Record
+	record
 }

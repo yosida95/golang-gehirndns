@@ -130,7 +130,7 @@ func (c *Client) AddNS(name, ns HostName, ttl Seconds) (resource *NSRecord, err 
 
 	resource = &NSRecord{
 		NameServer: ns,
-		Record: Record{
+		record: record{
 			HostName: name,
 			Type:     recordType,
 			TTL:      ttl,
@@ -148,7 +148,7 @@ func (c *Client) AddA(name HostName, addr IPv4, ttl Seconds) (resource *ARecord,
 
 	resource = &ARecord{
 		IPAddress: addr,
-		Record: Record{
+		record: record{
 			HostName: name,
 			Type:     recordType,
 			TTL:      ttl,
@@ -166,7 +166,7 @@ func (c *Client) AddAAAA(name HostName, addr IPv6, ttl Seconds) (resource *AAAAR
 
 	resource = &AAAARecord{
 		IPAddress: addr,
-		Record: Record{
+		record: record{
 			HostName: name,
 			Type:     recordType,
 			TTL:      ttl,
@@ -184,7 +184,7 @@ func (c *Client) AddCNAME(name, to HostName, ttl Seconds) (resource *CNAMERecord
 
 	resource = &CNAMERecord{
 		AliasTo: to,
-		Record: Record{
+		record: record{
 			HostName: name,
 			Type:     recordType,
 			TTL:      ttl,
@@ -203,7 +203,7 @@ func (c *Client) AddMX(name, mailServer HostName, priority Priority, ttl Seconds
 	resource = &MXRecord{
 		MailServer: mailServer,
 		Priority:   priority,
-		Record: Record{
+		record: record{
 			HostName: name,
 			Type:     recordType,
 			TTL:      ttl,
@@ -221,7 +221,7 @@ func (c *Client) AddTXT(name HostName, value string, ttl Seconds) (resource *TXT
 
 	resource = &TXTRecord{
 		Value: value,
-		Record: Record{
+		record: record{
 			HostName: name,
 			Type:     recordType,
 			TTL:      ttl,
@@ -242,7 +242,7 @@ func (c *Client) AddSRV(name, target HostName, port, weight uint, priority Prior
 		Port:     port,
 		Weight:   weight,
 		Priority: priority,
-		Record: Record{
+		record: record{
 			HostName: name,
 			Type:     recordType,
 			TTL:      ttl,
