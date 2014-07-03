@@ -123,12 +123,12 @@ func (c *Client) GetResources() (err error) {
 	return
 }
 
-func (c *Client) AddNS(name, ns HostName, ttl Seconds) (record *NSRecord, err error) {
+func (c *Client) AddNS(name, ns HostName, ttl Seconds) (resource *NSRecord, err error) {
 	const (
 		recordType RecordType = "NS"
 	)
 
-	record = &NSRecord{
+	resource = &NSRecord{
 		NameServer: ns,
 		Record: Record{
 			HostName: name,
@@ -137,16 +137,16 @@ func (c *Client) AddNS(name, ns HostName, ttl Seconds) (record *NSRecord, err er
 		},
 	}
 
-	err = c.AddResource(record)
+	err = c.AddResource(resource)
 	return
 }
 
-func (c *Client) AddA(name HostName, addr IPv4, ttl Seconds) (record *ARecord, err error) {
+func (c *Client) AddA(name HostName, addr IPv4, ttl Seconds) (resource *ARecord, err error) {
 	const (
 		recordType RecordType = "A"
 	)
 
-	record = &ARecord{
+	resource = &ARecord{
 		IPAddress: addr,
 		Record: Record{
 			HostName: name,
@@ -155,16 +155,16 @@ func (c *Client) AddA(name HostName, addr IPv4, ttl Seconds) (record *ARecord, e
 		},
 	}
 
-	err = c.AddResource(record)
+	err = c.AddResource(resource)
 	return
 }
 
-func (c *Client) AddAAAA(name HostName, addr IPv6, ttl Seconds) (record *AAAARecord, err error) {
+func (c *Client) AddAAAA(name HostName, addr IPv6, ttl Seconds) (resource *AAAARecord, err error) {
 	const (
 		recordType RecordType = "AAAA"
 	)
 
-	record = &AAAARecord{
+	resource = &AAAARecord{
 		IPAddress: addr,
 		Record: Record{
 			HostName: name,
@@ -173,16 +173,16 @@ func (c *Client) AddAAAA(name HostName, addr IPv6, ttl Seconds) (record *AAAARec
 		},
 	}
 
-	err = c.AddResource(record)
+	err = c.AddResource(resource)
 	return
 }
 
-func (c *Client) AddCNAME(name, to HostName, ttl Seconds) (record *CNAMERecord, err error) {
+func (c *Client) AddCNAME(name, to HostName, ttl Seconds) (resource *CNAMERecord, err error) {
 	const (
 		recordType RecordType = "CNAME"
 	)
 
-	record = &CNAMERecord{
+	resource = &CNAMERecord{
 		AliasTo: to,
 		Record: Record{
 			HostName: name,
@@ -191,16 +191,16 @@ func (c *Client) AddCNAME(name, to HostName, ttl Seconds) (record *CNAMERecord, 
 		},
 	}
 
-	err = c.AddResource(record)
+	err = c.AddResource(resource)
 	return
 }
 
-func (c *Client) AddMX(name, mailServer HostName, priority Priority, ttl Seconds) (record *MXRecord, err error) {
+func (c *Client) AddMX(name, mailServer HostName, priority Priority, ttl Seconds) (resource *MXRecord, err error) {
 	const (
 		recordType RecordType = "MX"
 	)
 
-	record = &MXRecord{
+	resource = &MXRecord{
 		MailServer: mailServer,
 		Priority:   priority,
 		Record: Record{
@@ -210,16 +210,16 @@ func (c *Client) AddMX(name, mailServer HostName, priority Priority, ttl Seconds
 		},
 	}
 
-	err = c.AddResource(record)
+	err = c.AddResource(resource)
 	return
 }
 
-func (c *Client) AddTXT(name HostName, value string, ttl Seconds) (record *TXTRecord, err error) {
+func (c *Client) AddTXT(name HostName, value string, ttl Seconds) (resource *TXTRecord, err error) {
 	const (
 		recordType RecordType = "TXT"
 	)
 
-	record = &TXTRecord{
+	resource = &TXTRecord{
 		Value: value,
 		Record: Record{
 			HostName: name,
@@ -228,16 +228,16 @@ func (c *Client) AddTXT(name HostName, value string, ttl Seconds) (record *TXTRe
 		},
 	}
 
-	err = c.AddResource(record)
+	err = c.AddResource(resource)
 	return
 }
 
-func (c *Client) AddSRV(name, target HostName, port, weight uint, priority Priority, ttl Seconds) (record *SRVRecord, err error) {
+func (c *Client) AddSRV(name, target HostName, port, weight uint, priority Priority, ttl Seconds) (resource *SRVRecord, err error) {
 	const (
 		recordType RecordType = "SRV"
 	)
 
-	record = &SRVRecord{
+	resource = &SRVRecord{
 		Target:   target,
 		Port:     port,
 		Weight:   weight,
@@ -249,7 +249,7 @@ func (c *Client) AddSRV(name, target HostName, port, weight uint, priority Prior
 		},
 	}
 
-	err = c.AddResource(record)
+	err = c.AddResource(resource)
 	return
 }
 
