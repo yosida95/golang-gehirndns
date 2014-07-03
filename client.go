@@ -266,6 +266,10 @@ func (c *Client) encodeJSON(object interface{}) (reader io.Reader, err error) {
 }
 
 func (c *Client) AddResource(record IRecord) (err error) {
+	if record.GetId() != "" {
+		return ErrMaybeRegistered
+	}
+
 	bodyObject := struct {
 		Resource IRecord
 	}{
