@@ -8,16 +8,11 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"strconv"
-
-	"github.com/kr/pretty"
 )
 
 const (
 	APIENDPOINT = "https://cp.gehirn.jp/api/dns/"
 )
-
-type ZoneId uint
 
 type ApiKey struct {
 	Token  string
@@ -29,16 +24,11 @@ type Client struct {
 	apiKey   *ApiKey
 }
 
-func NewClient(zoneId ZoneId, apiKey *ApiKey) *Client {
+func NewClient(apiKey *ApiKey) *Client {
 	endpoint, err := url.Parse(APIENDPOINT)
 	if err != nil {
 		panic(err)
 	}
-
-	endpoint.Path = path.Join(
-		endpoint.Path,
-		"resource",
-		strconv.Itoa(int(zoneId)))
 
 	return &Client{
 		endpoint: endpoint,
@@ -89,167 +79,7 @@ func (c *Client) request(req *http.Request, body interface{}) (err error) {
 	}
 
 	decoder := json.NewDecoder(resp.Body)
-	if err = decoder.Decode(&body); err != nil {
-		return
-	}
-
-	return
-}
-
-func (c *Client) GetResources() (err error) {
-	req, err := c.makeRequest("GET", "", nil)
-	if err != nil {
-		return
-	}
-
-	body := struct {
-		Resource struct {
-			SOA   SOARecord
-			NS    []NSRecord
-			A     []ARecord
-			AAAA  []AAAARecord
-			CNAME []CNAMERecord
-			MX    []MXRecord
-			TXT   []TXTRecord
-			SRV   []SRVRecord
-		}
-	}{}
-
-	if err = c.request(req, &body); err != nil {
-		return
-	}
-
-	pretty.Println(body.Resource)
-	return
-}
-
-func (c *Client) AddNS(name, ns HostName, ttl Seconds) (resource *NSRecord, err error) {
-	const (
-		recordType RecordType = "NS"
-	)
-
-	resource = &NSRecord{
-		NameServer: ns,
-		record: record{
-			HostName: name,
-			Type:     recordType,
-			TTL:      ttl,
-		},
-	}
-
-	err = c.AddResource(resource)
-	return
-}
-
-func (c *Client) AddA(name HostName, addr IPv4, ttl Seconds) (resource *ARecord, err error) {
-	const (
-		recordType RecordType = "A"
-	)
-
-	resource = &ARecord{
-		IPAddress: addr,
-		record: record{
-			HostName: name,
-			Type:     recordType,
-			TTL:      ttl,
-		},
-	}
-
-	err = c.AddResource(resource)
-	return
-}
-
-func (c *Client) AddAAAA(name HostName, addr IPv6, ttl Seconds) (resource *AAAARecord, err error) {
-	const (
-		recordType RecordType = "AAAA"
-	)
-
-	resource = &AAAARecord{
-		IPAddress: addr,
-		record: record{
-			HostName: name,
-			Type:     recordType,
-			TTL:      ttl,
-		},
-	}
-
-	err = c.AddResource(resource)
-	return
-}
-
-func (c *Client) AddCNAME(name, to HostName, ttl Seconds) (resource *CNAMERecord, err error) {
-	const (
-		recordType RecordType = "CNAME"
-	)
-
-	resource = &CNAMERecord{
-		AliasTo: to,
-		record: record{
-			HostName: name,
-			Type:     recordType,
-			TTL:      ttl,
-		},
-	}
-
-	err = c.AddResource(resource)
-	return
-}
-
-func (c *Client) AddMX(name, mailServer HostName, priority Priority, ttl Seconds) (resource *MXRecord, err error) {
-	const (
-		recordType RecordType = "MX"
-	)
-
-	resource = &MXRecord{
-		MailServer: mailServer,
-		Priority:   priority,
-		record: record{
-			HostName: name,
-			Type:     recordType,
-			TTL:      ttl,
-		},
-	}
-
-	err = c.AddResource(resource)
-	return
-}
-
-func (c *Client) AddTXT(name HostName, value string, ttl Seconds) (resource *TXTRecord, err error) {
-	const (
-		recordType RecordType = "TXT"
-	)
-
-	resource = &TXTRecord{
-		Value: value,
-		record: record{
-			HostName: name,
-			Type:     recordType,
-			TTL:      ttl,
-		},
-	}
-
-	err = c.AddResource(resource)
-	return
-}
-
-func (c *Client) AddSRV(name, target HostName, port, weight uint, priority Priority, ttl Seconds) (resource *SRVRecord, err error) {
-	const (
-		recordType RecordType = "SRV"
-	)
-
-	resource = &SRVRecord{
-		Target:   target,
-		Port:     port,
-		Weight:   weight,
-		Priority: priority,
-		record: record{
-			HostName: name,
-			Type:     recordType,
-			TTL:      ttl,
-		},
-	}
-
-	err = c.AddResource(resource)
+	err = decoder.Decode(&body)
 	return
 }
 
@@ -265,56 +95,23 @@ func (c *Client) encodeJSON(object interface{}) (reader io.Reader, err error) {
 	return
 }
 
-func (c *Client) AddResource(record IRecord) (err error) {
-	if record.GetId() != "" {
-		return ErrMaybeRegistered
-	}
-
-	bodyObject := struct {
-		Resource IRecord
-	}{
-		Resource: record,
-	}
-	body, err := c.encodeJSON(bodyObject)
+func (c *Client) GetZone(id ZoneId) (zone *Zone, err error) {
+	req, err := c.makeRequest("GET", path.Join("resource", id.String()), nil)
 	if err != nil {
 		return
 	}
 
-	request, err := c.makeRequest("POST", "", body)
-	if err != nil {
-		return
+	zone = &Zone{
+		id:     id,
+		client: c,
 	}
 
-	responseBody := struct {
-		Resource IRecord
+	body := struct {
+		Resource *Zone
 	}{
-		Resource: record,
-	}
-	err = c.request(request, &responseBody)
-	return
-}
-
-func (c *Client) UpdateResource(record IRecord) (err error) {
-	bodyObject := struct {
-		Resource IRecord
-	}{
-		Resource: record,
-	}
-	body, err := c.encodeJSON(bodyObject)
-	if err != nil {
-		return
+		Resource: zone,
 	}
 
-	request, err := c.makeRequest("PUT", record.GetId().String(), body)
-	if err != nil {
-		return
-	}
-
-	responseBody := struct {
-		Resource IRecord
-	}{
-		Resource: record,
-	}
-	err = c.request(request, &responseBody)
+	err = c.request(req, &body)
 	return
 }
